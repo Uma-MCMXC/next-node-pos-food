@@ -5,10 +5,12 @@ import LoginForm from '../components/LoginForm';
 import axios from 'axios';
 import config from '../config';
 import Swal from 'sweetalert2';
+import { useRouter } from 'next/navigation';
 
 const SignInPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
   const signin = async () => {
     try {
