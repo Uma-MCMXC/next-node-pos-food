@@ -25,6 +25,11 @@ const SignInPage: React.FC = () => {
 
       if (res.data.token !== undefined) {
         localStorage.setItem(config.token, res.data.token);
+
+        localStorage.setItem('next_name', res.data.name);
+        localStorage.setItem('next_user_id', res.data.id);
+
+        router.push('/backoffice');
       } else {
         Swal.fire({
           title: 'Username!!',
