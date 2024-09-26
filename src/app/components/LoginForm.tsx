@@ -1,22 +1,34 @@
 'use client';
 import React from 'react';
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  username: string;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  signin: () => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({
+  username,
+  setUsername,
+  password,
+  setPassword,
+  signin,
+}) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // จัดการการส่งฟอร์มที่นี่
+    signin();
   };
 
   return (
     <div className="h-screen bg-gray-100 flex items-center justify-center">
       <div className="w-full max-w-md mx-auto p-8 bg-white rounded-2xl shadow-sm">
         <div className="text-center mb-6">
-          <p className="font-extrabold text-purple-950 text-2xl">
-            Next.js + Node
-          </p>
+          <p className="font-extrabold text-purple-950 text-2xl">Next.js</p>
           <p className="text-gray-700">Workshop</p>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} method="post">
           <div className="mb-6">
             <label
               htmlFor="username"
@@ -27,6 +39,9 @@ const LoginForm: React.FC = () => {
             <input
               type="text"
               id="username"
+              name="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="username"
               required
@@ -42,6 +57,9 @@ const LoginForm: React.FC = () => {
             <input
               type="password"
               id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="•••••••••"
               required
