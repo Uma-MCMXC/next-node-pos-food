@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 const SignInPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  // สร้างสำหรับการเปลี่ยนหน้าใหม่
   const router = useRouter();
 
   const signin = async () => {
