@@ -9,30 +9,56 @@ import config from '@/app/config';
 export default function Page() {
   const [isOpen, setIsOpen] = useState(false); // จัดการสถานะ modal
 
-  // food type create
+  // ประกาศตัวแปร
+  const [id, setId] = useState(0);
   const [name, setName] = useState('');
   const [remark, setRemark] = useState('');
-
-  // food type lists
   const [foodType, setFoodTypes] = useState([]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const openModal = () => setIsOpen(true); // ฟังก์ชันเปิด modal
-  const closeModal = () => setIsOpen(false); // ฟังก์ชันปิด modal
+  // ฟังก์ชันเปิด modal
+  const openModal = (item: any = null) => {
+    if (item) {
+      // ถ้ามี item ให้ตั้งค่าข้อมูลสำหรับการแก้ไข
+      setId(item.id);
+      setName(item.name);
+      setRemark(item.remark);
+    } else {
+      // ถ้าไม่มี item (เพิ่มข้อมูลใหม่)
+      setId(0);
+      setName('');
+      setRemark('');
+    }
+    setIsOpen(true); // เปิด modal
+  };
 
-  // food type create
+  // ฟังก์ชันปิด modal
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  // food type create & edit
   const handleSave = async (e: any) => {
     e.preventDefault(); // ป้องกันการ submit ของ form
     try {
       const payload = {
         name: name,
         remark: remark,
+        id: id,
       };
 
-      await axios.post(config.apiServer + '/api/foodType/create', payload);
+      if (id == 0) {
+        // กรณีเพิ่มข้อมูลใหม่
+        await axios.post(config.apiServer + '/api/foodType/create', payload);
+      } else {
+        // กรณีแก้ไขข้อมูล
+        await axios.put(config.apiServer + '/api/foodType/update/', payload);
+        setId(0); // รีเซ็ตค่า id หลังแก้ไข
+      }
+
       fetchData();
       closeModal(); // ปิด modal หลังจากบันทึกสำเร็จ
     } catch (e: any) {
@@ -85,11 +111,18 @@ export default function Page() {
     }
   };
 
+  // food type edit
+  const edit = (item: any) => {
+    setId(item.id);
+    setName(item.name);
+    setRemark(item.remark);
+  };
+
   return (
     <>
       <button
         className="mb-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        onClick={openModal}
+        onClick={() => openModal()} // ปุ่มเพิ่ม
       >
         Add
       </button>
@@ -117,7 +150,10 @@ export default function Page() {
               <td className="px-6 py-4">{item.remark}</td>
               <td className="px-6 py-4">
                 <div className="flex space-x-2 mb-4">
-                  <button className="mb-4 bg-yellow-400 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                  <button
+                    className="mb-4 bg-yellow-400 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => openModal(item)} // ปุ่มแก้ไข
+                  >
                     Edit
                   </button>
                   <button
@@ -135,9 +171,13 @@ export default function Page() {
 
       <MyModal
         id="modalFoodType"
-        title="ประเภทอาหารและเครื่องดื่ม"
-        isOpen={isOpen}
-        onClose={closeModal}
+        title={
+          id === 0
+            ? 'เพิ่มประเภทอาหารและเครื่องดื่ม'
+            : 'แก้ไขประเภทอาหารและเครื่องดื่ม'
+        }
+        isOpen={isOpen} // เชื่อมต่อกับ state isOpen
+        onClose={closeModal} // ปิด modal เมื่อกดปุ่ม close
       >
         <form onSubmit={handleSave}>
           <div className="mb-6">
