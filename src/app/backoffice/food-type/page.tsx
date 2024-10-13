@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MyModal from '../components/MyModal';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -8,12 +8,22 @@ import config from '@/app/config';
 
 export default function Page() {
   const [isOpen, setIsOpen] = useState(false); // จัดการสถานะ modal
+
+  // food type create
   const [name, setName] = useState('');
   const [remark, setRemark] = useState('');
+
+  // food type lists
+  const [foodType, setFoodTypes] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const openModal = () => setIsOpen(true); // ฟังก์ชันเปิด modal
   const closeModal = () => setIsOpen(false); // ฟังก์ชันปิด modal
 
+  // food type create
   const handleSave = async (e: any) => {
     e.preventDefault(); // ป้องกันการ submit ของ form
     try {
@@ -35,8 +45,18 @@ export default function Page() {
     }
   };
 
+  // food type lists
   const fetchData = async () => {
-    // Fetch data logic here (ถ้ามี)
+    try {
+      const rows = await axios.get(config.apiServer + '/api/foodType/list');
+      setFoodTypes(rows.data.results);
+    } catch (e: any) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error',
+      });
+    }
   };
 
   return (
@@ -47,6 +67,38 @@ export default function Page() {
       >
         Add
       </button>
+
+      <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+          <tr>
+            <th scope="col" className="px-6 py-3">
+              Name
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Remark
+            </th>
+            <th scope="col" className="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {foodType.map((item: any) => (
+            <tr key={item.id} className="bg-white border-b">
+              <td className="px-6 py-4">{item.name}</td>
+              <td className="px-6 py-4">{item.remark}</td>
+              <td className="px-6 py-4">
+                <div className="flex space-x-2 mb-4">
+                  <button className="mb-4 bg-yellow-400 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                    Edit
+                  </button>
+                  <button className="mb-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    Del
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <MyModal
         id="modalFoodType"
