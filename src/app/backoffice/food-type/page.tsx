@@ -59,6 +59,32 @@ export default function Page() {
     }
   };
 
+  // food type remove
+  const handleRemove = async (item: any) => {
+    try {
+      const button = await Swal.fire({
+        title: 'ยืนยันการลบ',
+        text: 'คุณต้องการลบใช่หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+
+      if (button.isConfirmed) {
+        await axios.delete(
+          config.apiServer + '/api/foodType/remove/' + item.id,
+        );
+        fetchData();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error',
+      });
+    }
+  };
+
   return (
     <>
       <button
@@ -72,6 +98,9 @@ export default function Page() {
         <thead className="text-xs text-gray-700 uppercase bg-gray-100">
           <tr>
             <th scope="col" className="px-6 py-3">
+              #
+            </th>
+            <th scope="col" className="px-6 py-3">
               Name
             </th>
             <th scope="col" className="px-6 py-3">
@@ -81,8 +110,9 @@ export default function Page() {
           </tr>
         </thead>
         <tbody>
-          {foodType.map((item: any) => (
+          {foodType.map((item: any, index: number) => (
             <tr key={item.id} className="bg-white border-b">
+              <td className="px-6 py-4">{index + 1}</td>
               <td className="px-6 py-4">{item.name}</td>
               <td className="px-6 py-4">{item.remark}</td>
               <td className="px-6 py-4">
@@ -90,7 +120,10 @@ export default function Page() {
                   <button className="mb-4 bg-yellow-400 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
                     Edit
                   </button>
-                  <button className="mb-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                  <button
+                    className="mb-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={(e) => handleRemove(item)}
+                  >
                     Del
                   </button>
                 </div>
