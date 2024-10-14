@@ -28,11 +28,15 @@ export default function Page() {
       setId(item.id);
       setName(item.name);
       setRemark(item.remark);
+      setFoodTypeId(item.foodTypeId);
+      setMoneyAdded(item.moneyAdded);
     } else {
       // ถ้าไม่มี item (เพิ่มข้อมูลใหม่)
       setId(0);
       setName('');
       setRemark('');
+      setFoodTypeId(0);
+      setMoneyAdded(0);
     }
     setIsOpen(true); // เปิด modal
   };
@@ -40,9 +44,6 @@ export default function Page() {
   // ฟังก์ชันปิด modal
   const closeModal = () => {
     setIsOpen(false);
-    setId(0);
-    setName('');
-    setRemark('');
   };
 
   const fetchData = async () => {
@@ -72,11 +73,41 @@ export default function Page() {
     }
   };
 
-  const edit = (item: any) => {};
+  const edit = (item: any) => {
+    setFoodTypeId(item.foodTypeId);
+    setId(item.id);
+    setMoneyAdded(item.moneyAdded);
+    setName(item.name);
+    setRemark(item.remark);
+  };
 
-  const remove = (item: any) => {};
+  const remove = async (item: any) => {
+    try {
+      const button = await Swal.fire({
+        title: 'ยืนยันการลบ',
+        text: 'คุณต้องการลบใช่หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
 
-  const save = async () => {
+      if (button.isConfirmed) {
+        await axios.delete(
+          config.apiServer + '/api/foodSize/remove/' + item.id,
+        );
+        fetchData();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error',
+      });
+    }
+  };
+
+  const save = async (e: any) => {
+    e.preventDefault(); // ป้องกันการ refresh หน้าเว็บ
     const payload = {
       name: name,
       remark: remark,
@@ -84,9 +115,22 @@ export default function Page() {
       foodTypeId: foodTypeId,
       moneyAdded: moneyAdded,
     };
-    await axios.post(config.apiServer + '/api/foodSize/create', payload);
-    fetchData();
-    closeModal(); // ปิด modal หลังจากบันทึกสำเร็จ
+    try {
+      if (id == 0) {
+        await axios.post(config.apiServer + '/api/foodSize/create', payload);
+      } else {
+        await axios.put(config.apiServer + '/api/foodSize/update/', payload);
+        setId(0); // รีเซ็ตค่า id หลังแก้ไข
+      }
+      fetchData(); // ดึงข้อมูลใหม่
+      closeModal(); // ปิด modal
+    } catch (error: any) {
+      Swal.fire({
+        title: 'Error',
+        text: error.message,
+        icon: 'error',
+      });
+    }
   };
 
   return (
@@ -168,12 +212,11 @@ export default function Page() {
             <select
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               onChange={(e) => setFoodTypeId(parseInt(e.target.value))}
+              value={foodTypeId}
             >
-              <option value="" disabled>
-                Choose a country
-              </option>
+              <option value="">Choose a country</option>
               {foodTypes.map((item: any) => (
-                <option key={item.id} value="{item.id}">
+                <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
               ))}
