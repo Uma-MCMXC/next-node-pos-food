@@ -1,4 +1,3 @@
-/* use client */
 import React, { useState, useEffect } from 'react';
 
 interface ModalProps {
@@ -39,13 +38,11 @@ const Modal: React.FC<ModalProps> = ({
         tabIndex={-1}
         aria-hidden={!isOpen}
         className={`${isOpen ? 'flex' : 'hidden'} overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-full`}
+        style={{
+          backdropFilter: 'blur(1px)', // ปรับค่าความเบลอที่นี่
+          backgroundColor: 'rgba(0, 0, 0, 0.3)', // สีดำโปร่งใส 30%
+        }}
       >
-        {/* Overlay for clicking outside modal to close it */}
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50"
-          onClick={onClose}
-        ></div>
-
         {/* Modal content */}
         <div
           className="relative p-4 w-full max-w-2xl max-h-full z-10"
@@ -63,7 +60,6 @@ const Modal: React.FC<ModalProps> = ({
                 onClick={onClose}
                 aria-label="Close modal"
               >
-                {/* Close button icon (SVG can be placed here) */}
                 <svg
                   className="w-5 h-5"
                   fill="none"

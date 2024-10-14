@@ -38,7 +38,7 @@ export default function Sidebar() {
 
           <li>
             <Link
-              href="#"
+              href="/backoffice/food-size"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -55,7 +55,7 @@ export default function Sidebar() {
                   d="M9 8h10M9 12h10M9 16h10M4.99 8H5m-.02 4h.01m0 4H5"
                 />
               </svg>
-              <span className="ms-3">...</span>
+              <span className="ms-3">Food Size</span>
             </Link>
           </li>
         </ul>

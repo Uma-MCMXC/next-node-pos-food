@@ -120,6 +120,10 @@ export default function Page() {
 
   return (
     <>
+      <h4 className="text-2xl font-bold dark:text-white mb-5 text-blue-800">
+        Food Type
+      </h4>
+
       <button
         className="mb-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         onClick={() => openModal()} // ปุ่มเพิ่ม
@@ -145,11 +149,11 @@ export default function Page() {
         <tbody>
           {foodType.map((item: any, index: number) => (
             <tr key={item.id} className="bg-white border-b">
-              <td className="px-6 py-4">{index + 1}</td>
-              <td className="px-6 py-4">{item.name}</td>
-              <td className="px-6 py-4">{item.remark}</td>
-              <td className="px-6 py-4">
-                <div className="flex space-x-2 mb-4">
+              <td className="px-6 py-3">{index + 1}</td>
+              <td className="px-6 py-3">{item.name}</td>
+              <td className="px-6 py-3">{item.remark}</td>
+              <td className="px-6 py-3">
+                <div className="flex space-x-2">
                   <button
                     className="mb-4 bg-yellow-400 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
                     onClick={() => openModal(item)} // ปุ่มแก้ไข
@@ -171,11 +175,7 @@ export default function Page() {
 
       <MyModal
         id="modalFoodType"
-        title={
-          id === 0
-            ? 'เพิ่มประเภทอาหารและเครื่องดื่ม'
-            : 'แก้ไขประเภทอาหารและเครื่องดื่ม'
-        }
+        title={id === 0 ? 'Add Food Type' : 'Edit Food Type'}
         isOpen={isOpen} // เชื่อมต่อกับ state isOpen
         onClose={closeModal} // ปิด modal เมื่อกดปุ่ม close
       >
