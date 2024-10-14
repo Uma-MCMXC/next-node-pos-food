@@ -40,9 +40,23 @@ export default function Page() {
   // ฟังก์ชันปิด modal
   const closeModal = () => {
     setIsOpen(false);
+    setId(0);
+    setName('');
+    setRemark('');
   };
 
-  const fetchData = async () => {};
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(config.apiServer + '/api/foodSize/list');
+      setFoodSizes(res.data.results);
+    } catch (e: any) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error',
+      });
+    }
+  };
 
   const fetchDateFoodSizes = async () => {
     try {
@@ -72,11 +86,8 @@ export default function Page() {
     };
     await axios.post(config.apiServer + '/api/foodSize/create', payload);
     fetchData();
-
-    document.getElementById('modalFoodSize_btnClose')?.click();
+    closeModal(); // ปิด modal หลังจากบันทึกสำเร็จ
   };
-
-  const clearForm = () => {};
 
   return (
     <>
@@ -89,6 +100,56 @@ export default function Page() {
       >
         Add
       </button>
+
+      <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+          <tr>
+            <th scope="col" className="px-6 py-3">
+              #
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Food Type
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Name
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Remark
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Money Added
+            </th>
+            <th scope="col" className="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {foodSizes.map((item: any, index: number) => (
+            <tr key={item.id} className="bg-white border-b">
+              <td className="px-6 py-3">{index + 1}</td>
+              <td className="px-6 py-3">{item.FoodType.name}</td>
+              <td className="px-6 py-3">{item.name}</td>
+              <td className="px-6 py-3">{item.remark}</td>
+              <td className="px-6 py-3">{item.moneyAdded}</td>
+              <td className="px-6 py-3">
+                <div className="flex space-x-2">
+                  <button
+                    className="mb-4 bg-yellow-400 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => openModal(item)} // ปุ่มแก้ไข
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="mb-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={(e) => remove(item)}
+                  >
+                    Del
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <MyModal
         id="modalFoodSize"
