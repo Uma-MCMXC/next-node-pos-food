@@ -18,6 +18,7 @@ export default function Page() {
   const [price, setPrice] = useState(0);
   const [img, setImg] = useState('');
   const [myFile, setMyFile] = useState<File | null>(null);
+  const [foodType, setFoodType] = useState('food');
 
   useEffect(() => {
     fetchDateFoodTypes();
@@ -32,6 +33,7 @@ export default function Page() {
       setFoodTypeId(item.foodTypeId);
       setPrice(item.price);
       setImg(item.img);
+      setFoodType(item.foodType);
     } else {
       setId(0);
       setName('');
@@ -39,6 +41,7 @@ export default function Page() {
       setFoodTypeId(0);
       setPrice(0);
       setImg('');
+      setFoodType('');
     }
     setIsOpen(true); // เปิด modal
   };
@@ -93,42 +96,47 @@ export default function Page() {
         price: price,
         img: img,
         id: id,
+        foodType: foodType,
       };
 
-      const res = await axios.post(
-        config.apiServer + '/api/food/create',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
+      if (id == 0) {
+        const res = await axios.post(
+          config.apiServer + '/api/food/create',
+          payload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        },
-      );
-
-      if (res.data.message === 'success') {
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกข้อมูล',
-          text: 'บันทึกข้อมูลสำเร็จ',
-          timer: 1500,
-        });
+        );
+      } else {
+        const res = await axios.put(
+          config.apiServer + '/api/food/update',
+          payload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        setId(0);
       }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกข้อมูล',
+        text: 'บันทึกข้อมูลสำเร็จ',
+        timer: 1500,
+      });
+
       fetchData();
       closeModal();
     } catch (e: any) {
-      if (e.response) {
-        Swal.fire({
-          title: 'Error',
-          text: e.response.data?.message || 'Something went wrong',
-          icon: 'error',
-        });
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: e.message || 'Something went wrong',
-          icon: 'error',
-        });
-      }
+      Swal.fire({
+        title: 'Error',
+        text: e.message || 'Something went wrong',
+        icon: 'error',
+      });
     }
   };
 
@@ -153,23 +161,54 @@ export default function Page() {
 
       return res.data.fileName;
     } catch (e: any) {
-      if (e.response) {
-        Swal.fire({
-          title: 'Error',
-          text: e.response.data?.message || 'Something went wrong',
-          icon: 'error',
-        });
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: e.message || 'Something went wrong',
-          icon: 'error',
-        });
-      }
+      Swal.fire({
+        title: 'Error',
+        text: e.response.data?.message || 'Something went wrong',
+        icon: 'error',
+      });
     }
   };
 
-  const handleRemove = async (item: any) => {};
+  const getFoodTypeName = (foodType: string): string => {
+    if (foodType == 'food') {
+      return 'อาหาร';
+    } else {
+      return 'เครื่องดื่ม';
+    }
+  };
+
+  const handleRemove = async (item: any) => {
+    try {
+      const button = await Swal.fire({
+        title: 'ยืนยันการลบ',
+        text: 'คุณต้องการลบใช่หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+
+      if (button.isConfirmed) {
+        await axios.delete(config.apiServer + '/api/food/remove/' + item.id);
+        fetchData();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error',
+      });
+    }
+  };
+
+  const edit = (item: any) => {
+    setId(item.id);
+    setFoodTypeId(item.foodTypeId);
+    setName(item.name);
+    setRemark(item.remark);
+    setPrice(item.price);
+    setFoodType(item.foodType);
+    setImg(item.img);
+  };
 
   return (
     <>
@@ -197,6 +236,9 @@ export default function Page() {
               Food Type
             </th>
             <th scope="col" className="px-6 py-3">
+              Type
+            </th>
+            <th scope="col" className="px-6 py-3">
               Name
             </th>
             <th scope="col" className="px-6 py-3">
@@ -216,10 +258,11 @@ export default function Page() {
                 <img
                   src={config.apiServer + '/uploads/' + item.img}
                   alt={item.name}
-                  width="50"
+                  width="80"
                 />
               </td>
               <td className="px-6 py-3">{item.FoodType.name}</td>
+              <td className="px-6 py-3">{getFoodTypeName(item.foodType)}</td>
               <td className="px-6 py-3">{item.name}</td>
               <td className="px-6 py-3">{item.remark}</td>
               <td className="px-6 py-3">{item.price}</td>
@@ -284,9 +327,16 @@ export default function Page() {
             >
               Img
             </label>
+            {img != '' && (
+              <img
+                className="mb-2"
+                src={config.apiServer + '/uploads/' + img}
+                alt={name}
+                width="100"
+              />
+            )}
             <input
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              value={img}
               onChange={(e) => handleSelectedFile(e)}
               type="file"
             />
@@ -332,6 +382,40 @@ export default function Page() {
               type="number"
             />
           </div>
+          <div className="mb-6">
+            <label
+              htmlFor="note"
+              className="block mb-2 text-sm font-medium text-gray-900"
+            >
+              Food Type
+            </label>
+            <div className="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+              <input
+                type="radio"
+                name="foodType"
+                value="food"
+                checked={foodType === 'food'}
+                onChange={(e) => setFoodType(e.target.value)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+              />
+              <label className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                Food
+              </label>
+
+              <input
+                type="radio"
+                name="foodType"
+                value="drink"
+                checked={foodType === 'drink'}
+                onChange={(e) => setFoodType(e.target.value)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+              />
+              <label className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                Drink
+              </label>
+            </div>
+          </div>
+
           <button
             type="submit"
             className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5"
