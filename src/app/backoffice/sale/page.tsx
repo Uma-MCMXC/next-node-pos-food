@@ -9,6 +9,8 @@ export default function Page() {
   const [table, setTable] = useState(1);
   const [foods, setFoods] = useState([]);
   const [saleTemps, setSaleTemps] = useState([]);
+  const [amount, setAmount] = useState(0);
+
   const myRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function Page() {
     try {
       const res = await axios.get(config.apiServer + '/api/saleTemp/list');
       setSaleTemps(res.data.results);
+      sumAmount(res.data.results);
     } catch (e: any) {
       Swal.fire({
         title: 'Error',
@@ -120,6 +123,13 @@ export default function Page() {
         icon: 'error',
       });
     }
+  };
+
+  const sumAmount = (saleTemps: any) => {
+    let total = 0;
+    saleTemps.forEach((item: any) => (total += item.Food.price * item.qty));
+
+    setAmount(total);
   };
 
   const removeAllSaleTemp = async (id: number) => {};
@@ -176,7 +186,7 @@ export default function Page() {
 
         <div className="mt-10 flex h-screen gap-5">
           {/* Left Section */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 col-span-2 flex-grow">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 col-span-2 flex-grow h-5">
             {foods.map((food: any) => (
               <div
                 key={food.id}
@@ -209,8 +219,8 @@ export default function Page() {
           <div className="flex flex-col flex-shrink-0 bg-white h-screen overflow-y-auto w-96">
             <div className="sticky top-0 bg-white z-10">
               <div className="text-right mb-3">
-                <div className="bg-gray-800 text-white text-2xl p-4 rounded-lg">
-                  0.00
+                <div className="bg-gray-800 text-white text-4xl p-4 rounded-lg">
+                  {amount.toLocaleString('th-TH')}
                 </div>
               </div>
             </div>
@@ -229,7 +239,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={(e) => updateQty(item.id, item.qty - 1)}
-                    className="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                    className="bg-gray-100  hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
                     <svg
                       className="w-3 h-3 text-gray-900 dark:text-white"
@@ -262,7 +272,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={(e) => updateQty(item.id, item.qty + 1)}
-                    className="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                    className="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
                     <svg
                       className="w-3 h-3 text-gray-900 dark:text-white"
