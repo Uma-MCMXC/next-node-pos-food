@@ -41,6 +41,24 @@ export default function Page() {
     }
   };
 
+  // save
+  const sale = async (foodId: number) => {
+    try {
+      const payload = {
+        tableNo: table,
+        userId: Number(localStorage.getItem('next_user_id')),
+        foodId: foodId,
+      };
+      await axios.post(config.apiServer + '/api/saleTemp/create', payload);
+    } catch (e: any) {
+      Swal.fire({
+        title: 'Error',
+        text: e.response.data?.message || 'Something went wrong',
+        icon: 'error',
+      });
+    }
+  };
+
   return (
     <>
       <h4 className="text-2xl font-bold dark:text-white mb-5 text-blue-800">
@@ -97,6 +115,7 @@ export default function Page() {
                   src={config.apiServer + '/uploads/' + food.img}
                   alt={food.name}
                   style={{ height: '150px', objectFit: 'cover' }}
+                  onClick={(e) => sale(food.id)}
                 />
                 <div className="p-4">
                   <h2 className="mb-2 text-xl font-semibold text-gray-900">
