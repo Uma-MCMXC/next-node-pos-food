@@ -26,6 +26,21 @@ export default function Page() {
     }
   };
 
+  const filterFoods = async (foodType: string) => {
+    try {
+      const res = await axios.get(
+        `${config.apiServer}/api/food/filter/${foodType}`,
+      );
+      setFoods(res.data.results);
+    } catch (e: any) {
+      Swal.fire({
+        title: 'Error',
+        text: e.response.data?.message || 'Something went wrong',
+        icon: 'error',
+      });
+    }
+  };
+
   return (
     <>
       <h4 className="text-2xl font-bold dark:text-white mb-5 text-blue-800">
@@ -47,13 +62,22 @@ export default function Page() {
           </div>
 
           <div>
-            <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
+            <button
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              onClick={() => filterFoods('food')}
+            >
               Food
             </button>
-            <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
+            <button
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              onClick={() => filterFoods('drink')}
+            >
               DrinK
             </button>
-            <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
+            <button
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              onClick={() => filterFoods('all')}
+            >
               All
             </button>
             <button className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
