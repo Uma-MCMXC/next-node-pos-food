@@ -41,7 +41,8 @@ export default function Page() {
       setFoodTypeId(0);
       setPrice(0);
       setImg('');
-      setFoodType('');
+      setFoodType('food');
+      (document.getElementById('myFile') as HTMLInputElement).value = '';
     }
     setIsOpen(true); // เปิด modal
   };
