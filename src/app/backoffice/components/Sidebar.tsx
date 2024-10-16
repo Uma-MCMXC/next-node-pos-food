@@ -15,6 +15,30 @@ export default function Sidebar() {
         <ul className="space-y-2 font-medium">
           <li>
             <Link
+              href="/backoffice/sale"
+              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+            >
+              <svg
+                className="w-5 h-5 text-blue-700 transition duration-75 dark:text-gray-400 group-hover:text-gray-900"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 21"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M1 5h12m0 0L9 1m4 4L9 9"
+                />
+              </svg>
+              <span className="ms-3 text-blue-700">Sell Products</span>
+            </Link>
+          </li>
+
+          <li>
+            <Link
               href="/backoffice/food-type"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
