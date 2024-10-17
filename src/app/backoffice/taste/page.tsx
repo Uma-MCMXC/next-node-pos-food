@@ -14,7 +14,7 @@ export default function Page() {
   const [remark, setRemark] = useState('');
   const [foodTypeId, setFoodTypeId] = useState(0);
   const [foodTypes, setFoodTypes] = useState([]);
-  const [testes, setTestes] = useState([]);
+  const [tastes, setTastes] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -43,8 +43,8 @@ export default function Page() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(config.apiServer + '/api/teste/list');
-      setTestes(res.data.results);
+      const res = await axios.get(config.apiServer + '/api/taste/list');
+      setTastes(res.data.results);
     } catch (e: any) {
       Swal.fire({
         title: 'error',
@@ -81,13 +81,13 @@ export default function Page() {
 
       if (id == 0) {
         const response = await axios.post(
-          config.apiServer + '/api/teste/create',
+          config.apiServer + '/api/taste/create',
           payload,
         );
         console.log('Create response:', response);
       } else {
         const response = await axios.put(
-          config.apiServer + '/api/teste/update',
+          config.apiServer + '/api/taste/update',
           {
             ...payload,
             id: id, // ตรวจสอบว่ามีการส่ง id เพื่อทำการอัปเดต
@@ -125,7 +125,7 @@ export default function Page() {
         showConfirmButton: true,
       });
       if (button.isConfirmed) {
-        await axios.delete(config.apiServer + '/api/teste/remove/' + item.id);
+        await axios.delete(config.apiServer + '/api/taste/remove/' + item.id);
         fetchData();
       }
     } catch (e: any) {
@@ -147,7 +147,7 @@ export default function Page() {
   return (
     <>
       <h4 className="text-2xl font-bold dark:text-white mb-5 text-blue-800">
-        Teste
+        Taste
       </h4>
 
       <button
@@ -176,7 +176,7 @@ export default function Page() {
           </tr>
         </thead>
         <tbody>
-          {testes.map((item: any, index: number) => (
+          {tastes.map((item: any, index: number) => (
             <tr key={item.id} className="bg-white border-b">
               <td className="px-6 py-3">{index + 1}</td>
               <td className="px-6 py-3">{item.FoodType.name}</td>
@@ -205,7 +205,7 @@ export default function Page() {
 
       <MyModal
         id="modalFoodSize"
-        title={id === 0 ? 'Add Teste' : 'Edit Teste'}
+        title={id === 0 ? 'Add Taste' : 'Edit Taste'}
         isOpen={isOpen} // เชื่อมต่อกับ state isOpen
         onClose={closeModal} // ปิด modal เมื่อกดปุ่ม close
       >

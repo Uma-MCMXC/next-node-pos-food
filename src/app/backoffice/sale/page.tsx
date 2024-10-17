@@ -4,20 +4,46 @@ import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import config from '@/app/config';
+import MyModal from '../components/MyModal';
 
 export default function Page() {
   const [table, setTable] = useState(1);
   const [foods, setFoods] = useState([]);
   const [saleTemps, setSaleTemps] = useState([]);
+  const [tastes, setTastes] = useState([]);
+  const [sizes, setSizes] = useState([]);
   const [amount, setAmount] = useState(0);
+  const [saleTempDetails, setSaleTempDetails] = useState([]);
 
   const myRef = useRef<HTMLInputElement>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     getFoods();
     fetchDataSaleTemp();
     (myRef.current as HTMLInputElement).focus();
   }, []);
+
+  //   const openModal = async (item: any = null) => {
+  //     if (item) {
+  //       setIsOpen(true);
+  //       fetchDataSaleTempInfo(item.id);
+  //       generateSaleTempDetail(item.id);
+  //     }
+  //   };
+  const openModal = async (item: any = null) => {
+    if (item) {
+      console.log('Opening modal with item:', item);
+      await fetchDataSaleTempInfo(item.id);
+      setIsOpen(true);
+    }
+  };
+
+  // ฟังก์ชันปิด modal
+  const closeModal = () => {
+    setIsOpen(false);
+  };
 
   const getFoods = async () => {
     try {
@@ -90,12 +116,37 @@ export default function Page() {
       });
 
       if (button.isConfirmed) {
+        // แก้ไข URL โดยเพิ่มเครื่องหมาย '/'
+        await axios.delete(`${config.apiServer}/api/saleTemp/remove/${id}`);
+        fetchDataSaleTemp();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: 'Error',
+        text: e.response?.data?.message || 'Something went wrong',
+        icon: 'error',
+      });
+    }
+  };
+
+  const removeAllSaleTemp = async () => {
+    try {
+      const button = await Swal.fire({
+        title: 'คุณต้องการลบรายการนี้ ?',
+        icon: 'warning',
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+
+      if (button.isConfirmed) {
         const payload = {
           tableNo: table,
           userId: Number(localStorage.getItem('next_user_id')),
         };
 
-        await axios.delete(config.apiServer + '/api/saleTemp/remove' + id);
+        await axios.delete(config.apiServer + '/api/saleTemp/removeAll', {
+          data: payload,
+        });
         fetchDataSaleTemp();
       }
     } catch (e: any) {
@@ -132,7 +183,53 @@ export default function Page() {
     setAmount(total);
   };
 
-  const removeAllSaleTemp = async (id: number) => {};
+  const generateSaleTempDetail = async (saleTempId: number) => {
+    try {
+      const payload = {
+        saleTempId: saleTempId,
+      };
+      await axios.post(
+        config.apiServer + '/api/sateTemp/generateSaleTempDetail',
+        payload,
+      );
+      await fetchDataSaleTemp();
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: 'Error',
+        text: e.response.data?.message || 'Something went wrong',
+        icon: 'error',
+      });
+    }
+  };
+
+  const fetchDataSaleTempInfo = async (saleTempId: number) => {
+    try {
+      const res = await axios.get(
+        `${config.apiServer}/api/saleTemp/info/${saleTempId}`,
+      );
+      console.log('API Response:', res.data.results);
+
+      // ตรวจสอบว่า res.data.results เป็น array ก่อนที่จะตั้งค่าใน state
+      if (Array.isArray(res.data.results)) {
+        setSaleTempDetails(res.data.results);
+        console.log('SaleTempDetails State:', res.data.results);
+      } else {
+        console.error(
+          'SaleTempDetails data is not an array:',
+          res.data.results,
+        );
+        setSaleTempDetails([]);
+      }
+    } catch (e: any) {
+      console.error('Error:', e);
+      Swal.fire({
+        title: 'Error',
+        text: e.response?.data?.message || 'Something went wrong',
+        icon: 'error',
+      });
+    }
+  };
 
   return (
     <>
@@ -140,10 +237,10 @@ export default function Page() {
         Sell Products
       </h4>
 
-      <div className="max-w-full p-6 bg-white border border-gray-300 rounded-lg">
-        <div className="flex space-x-5">
+      <div className="max-w-full p-6 bg-white border border-gray-300 rounded-lg h-auto">
+        <div className="flex flex-col space-y-5">
           <div className="flex max-w-sm">
-            <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md">
+            <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-gray-300 rounded-s-md">
               Table
             </span>
             <input
@@ -155,38 +252,38 @@ export default function Page() {
             />
           </div>
 
-          <div>
+          <div className="flex space-x-2">
             <button
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
               onClick={() => filterFoods('food')}
             >
               Food
             </button>
             <button
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
               onClick={() => filterFoods('drink')}
             >
               Drink
             </button>
             <button
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
               onClick={() => filterFoods('all')}
             >
               All
             </button>
             <button
-              onClick={() => removeAllSaleTemp}
+              onClick={() => removeAllSaleTemp()}
               disabled={saleTemps.length === 0}
-              className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
             >
-              Reset
+              Cancel All
             </button>
           </div>
         </div>
 
-        <div className="mt-10 flex h-screen gap-5">
+        <div className="mt-10 flex gap-5">
           {/* Left Section */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 col-span-2 flex-grow h-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 flex-grow">
             {foods.map((food: any) => (
               <div
                 key={food.id}
@@ -216,7 +313,7 @@ export default function Page() {
           </div>
 
           {/* Right Section */}
-          <div className="flex flex-col flex-shrink-0 bg-white h-screen overflow-y-auto w-96">
+          <div className="w-96 flex-grow">
             <div className="sticky top-0 bg-white z-10">
               <div className="text-right mb-3">
                 <div className="bg-gray-800 text-white text-4xl p-4 rounded-lg">
@@ -239,7 +336,8 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={(e) => updateQty(item.id, item.qty - 1)}
-                    className="bg-gray-100  hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
+                    disabled={item.saleTempDetails.length > 0}
+                    className="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
                     <svg
                       className="w-3 h-3 text-gray-900 dark:text-white"
@@ -272,6 +370,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={(e) => updateQty(item.id, item.qty + 1)}
+                    disabled={item.saleTempDetails.length > 0}
                     className="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
                     <svg
@@ -299,7 +398,10 @@ export default function Page() {
                   >
                     Cancel
                   </button>
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                  <button
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                    onClick={() => openModal(item)}
+                  >
                     Edit
                   </button>
                 </div>
@@ -308,6 +410,82 @@ export default function Page() {
           </div>
         </div>
       </div>
+
+      <MyModal
+        id="modalEditFood"
+        title="Edit Food List"
+        isOpen={isOpen}
+        onClose={closeModal}
+      >
+        <button className="mb-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Add
+        </button>
+
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3"></th>
+              <th scope="col" className="px-6 py-3">
+                Food Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Taste
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Food Size
+              </th>
+              <th scope="col" className="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(saleTempDetails) && saleTempDetails.length > 0 ? (
+              saleTempDetails.map((item: any) => (
+                <tr key={item.id}>
+                  <td>
+                    <button className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg px-3 py-2 text-xs me-2 mb-2">
+                      ลบ
+                    </button>
+                  </td>
+                  <td>{item.Food?.name || 'No Food Name'}</td>
+                  <td>
+                    <div className="grid grid-cols-1 gap-1 md:grid-cols-3">
+                      {item.Food?.FoodType?.Tastes?.map((taste: any) => (
+                        <button
+                          className="text-purple-700 hover:text-white border border-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg px-3 py-2 text-xs text-center me-2 mb-2"
+                          key={taste.id}
+                        >
+                          {taste.name}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="grid grid-cols-1 gap-1 md:grid-cols-1">
+                      {item.Food?.FoodType?.FoodSizes?.map((size: any) =>
+                        size.moneyAdded > 0 ? (
+                          <button
+                            className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg px-3 py-2 text-xs text-center me-2 mb-2"
+                            key={size.id}
+                          >
+                            +{size.moneyAdded} {size.name}
+                          </button>
+                        ) : null,
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center">
+                  No data available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <form></form>
+      </MyModal>
     </>
   );
 }
