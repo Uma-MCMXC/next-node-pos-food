@@ -25,16 +25,8 @@ export default function Page() {
     (myRef.current as HTMLInputElement).focus();
   }, []);
 
-  //   const openModal = async (item: any = null) => {
-  //     if (item) {
-  //       setIsOpen(true);
-  //       fetchDataSaleTempInfo(item.id);
-  //       generateSaleTempDetail(item.id);
-  //     }
-  //   };
   const openModal = async (item: any = null) => {
     if (item) {
-      console.log('Opening modal with item:', item);
       await fetchDataSaleTempInfo(item.id);
       setIsOpen(true);
     }
@@ -208,17 +200,11 @@ export default function Page() {
       const res = await axios.get(
         `${config.apiServer}/api/saleTemp/info/${saleTempId}`,
       );
-      console.log('API Response:', res.data.results);
 
       // ตรวจสอบว่า res.data.results เป็น array ก่อนที่จะตั้งค่าใน state
       if (Array.isArray(res.data.results)) {
         setSaleTempDetails(res.data.results);
-        console.log('SaleTempDetails State:', res.data.results);
       } else {
-        console.error(
-          'SaleTempDetails data is not an array:',
-          res.data.results,
-        );
         setSaleTempDetails([]);
       }
     } catch (e: any) {
